@@ -397,16 +397,11 @@ class _HomeState extends State<Home> {
     final isValid = formKey.currentState!.validate();
     if (!isValid) return;
     if (stocksDropDown == "Select Stock") {
-      return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => Builder(
-          builder: (context) {
-            return const Center(
-              child: SnackBar(content: Text("Please select a stock")),
-            );
-          }
-        ),
+      return ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Select a Stock"),
+          backgroundColor: Colors.redAccent,
+        )
       );
     }
     showDialog(
