@@ -4,7 +4,6 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:motion_toast/motion_toast.dart';
 import 'package:motion_toast/resources/arrays.dart';
-import 'package:portfolio_management/style.dart';
 
 class Home extends StatefulWidget {
   const Home({ Key? key }) : super(key: key);
@@ -126,7 +125,8 @@ class _HomeState extends State<Home> {
                         ),
                         content: ElevatedButton(
                           onPressed: upload,
-                          child: const Text(
+                          // ignore: sort_child_properties_last
+                          child:  const Text(
                             "Add Stock",
                             style: TextStyle(
                               fontSize: 16,
@@ -139,7 +139,9 @@ class _HomeState extends State<Home> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                              // ignore: deprecated_member_use
                               onPrimary: const Color.fromARGB(255, 184, 183, 183),
+                              // ignore: deprecated_member_use
                               primary: Colors.black),
                         ),
                         contentPadding: const EdgeInsets.only(
@@ -421,7 +423,7 @@ class _HomeState extends State<Home> {
         'transaction_date':transactionDateController.text.trim().toString(),
         'transaction_quantity':quantityController.text.trim().toString(),
         'transaction_status':transactionStatusController.text.trim().toString(),
-        'buying/selling_Price':buySellController.text.trim().toString(),
+        'selling_Price':buySellController.text.trim().toString(),
         'total_amount':0+int.parse(amountController.text.trim().toString()),
       };
       await documentReferencer.set(data).then((value) => Navigator.pop(context))
@@ -567,6 +569,7 @@ class _HomeState extends State<Home> {
         'amount':amountController1.text.trim().toString(),
         'transaction_date':transactionDateController1.text.trim().toString(),
         'transaction_quantity':quantityController1.text.trim().toString(),
+        'selling_Price':buySellController.text.trim().toString(),
         'transaction_status':transactionStatusController1.text.trim().toString(),
         'total_amount':0+int.parse(amountController1.text.trim().toString())
 

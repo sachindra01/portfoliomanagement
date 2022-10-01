@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:portfolio_management/home.dart';
 import 'package:portfolio_management/mainpage.dart';
 
 
