@@ -1,5 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:portfolio_management/controller/stock_controller.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({ Key? key }) : super(key: key);
@@ -9,6 +10,7 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
+    final StockManageController stockManageController = Get.put(StockManageController());
   // var formKey = GlobalKey<FormState>();
   // final amountController = TextEditingController();
   // final quantityController = TextEditingController();
@@ -29,33 +31,35 @@ class _DashBoardState extends State<DashBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar:  AppBar(
+        centerTitle: true,
+        title: const Text('PortFolio Management'),
+        backgroundColor: Colors.blueGrey,
+      ),
       body: SafeArea(
         child: Column(
           children: [
             //Table
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection("stock").snapshots(),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-
-                      return const Text(
-                        'Loading...',
-                      );
-                    } else {
-                      List<QueryDocumentSnapshot<Object?>> firestoreItems = snapshot.data!.docs;
-                      return
-                          SizedBox(
-                            child: GridView.builder(
+              child: GetBuilder(
+                 init: stockManageController,
+                  builder: (_){
+        return Obx(
+          ()=> stockManageController.isLoading.value
+          ? SizedBox(
+            height: MediaQuery.of(context).size.height - kToolbarHeight,
+            child: const Center(child: CircularProgressIndicator( color: Colors.black,),),
+          )
+            :GridView.builder(
                               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 350,
+                                  maxCrossAxisExtent: 200,
                                   childAspectRatio: 2/ 2,
                                   crossAxisSpacing: 10,
-                                  mainAxisSpacing: 20),
-                              itemCount: firestoreItems.length,
+                                  mainAxisSpacing: 10),
+                              itemCount: stockManageController.stockList.length,
                               itemBuilder: (BuildContext ctx, index) {
-                              var x=  (int.parse(firestoreItems[index]['transaction_quantity'])*int.parse(firestoreItems[index]['selling_Price']))-int.parse(firestoreItems[index]['amount']);
-                              if( int.parse(firestoreItems[index]['amount'])>(int.parse(firestoreItems[index]['transaction_quantity'])*int.parse(firestoreItems[index]['selling_Price']))){
+                              var x=  (int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice))-int.parse(stockManageController.stockList[index].amount);
+                              if( int.parse(stockManageController.stockList[index].amount)>(int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice))){
                                 y='loss';
 
                               }else{
@@ -64,6 +68,7 @@ class _DashBoardState extends State<DashBoard> {
                                 return Padding(
                                   padding: const EdgeInsets.all(2.0),
                                   child: Container(
+                                    height: 50,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       color:y=='loss'?Colors.red: Colors.green,
@@ -80,7 +85,7 @@ class _DashBoardState extends State<DashBoard> {
                                              const  SizedBox(
                                                 width: 10,
                                           ),
-                                             Text(firestoreItems[index]['stock_name'],style: const TextStyle(
+                                             Text(stockManageController.stockList[index].stockName,style: const TextStyle(
                                               color: Colors.white,fontSize: 15.0
                                              )),
                                             ],
@@ -93,7 +98,7 @@ class _DashBoardState extends State<DashBoard> {
                                               const SizedBox(
                                                 width: 10,
                                               ),
-                                              Text(firestoreItems[index]['transaction_quantity'],style: const TextStyle(
+                                              Text(stockManageController.stockList[index].transactionQuantity,style: const TextStyle(
                                                 color: Colors.white,fontSize: 15.0
                                               )),
                                             ],
@@ -106,7 +111,7 @@ class _DashBoardState extends State<DashBoard> {
                                              const  SizedBox(
                                                 width: 10,
                                           ),
-                                             Text((int.parse(firestoreItems[index]['transaction_quantity'])*int.parse(firestoreItems[index]['selling_Price'])).toString(),style: const TextStyle(
+                                             Text((int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice)).toString(),style: const TextStyle(
                                               color: Colors.white,fontSize: 15.0
                                              )),
                                             ],
@@ -119,7 +124,7 @@ class _DashBoardState extends State<DashBoard> {
                                              const  SizedBox(
                                                 width: 10,
                                           ),
-                                             Text(firestoreItems[index]['amount'],style: const TextStyle(
+                                             Text(stockManageController.stockList[index].amount,style: const TextStyle(
                                               color: Colors.white,fontSize: 15.0
                                              )),
                                             ],
@@ -235,8 +240,9 @@ class _DashBoardState extends State<DashBoard> {
                     //   })
                     // );
                     }
-                  }),
-            ),
+                  
+              )
+            )
           ],
         ),
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:portfolio_management/dashboard.dart';
-import 'package:portfolio_management/home.dart';
+import 'package:portfolio_management/views/dashboard.dart';
+import 'package:portfolio_management/views/stock_view.dart';
 
 class MyNavigationBar extends StatefulWidget {  
   const MyNavigationBar ({Key? key}) : super(key: key);  
@@ -13,8 +13,8 @@ class MyNavigationBar extends StatefulWidget {
 class _MyNavigationBarState extends State<MyNavigationBar > {  
   int _selectedIndex = 0;  
   static const List<Widget> _widgetOptions = <Widget>[  
-   DashBoard(),
-    Home()
+  DashBoard(),
+  StockManage()
   ];  
   
   void _onItemTapped(int index) {  
@@ -26,11 +26,6 @@ class _MyNavigationBarState extends State<MyNavigationBar > {
   @override  
   Widget build(BuildContext context) {  
     return Scaffold(  
-      appBar: AppBar(  
-        centerTitle: true,
-        title: const Text('Portfolio Management'),  
-          backgroundColor: Colors.blueGrey
-      ),  
       body: Center(  
         child: _widgetOptions.elementAt(_selectedIndex),  
       ),  
