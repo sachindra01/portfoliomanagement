@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:portfolio_management/mainpage.dart';
+import 'package:portfolio_management/views/stock_view.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,12 +16,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Stock Management',
+      title: 'Portfolio Management',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyNavigationBar(),
+      home: const StockManage(),
     );
   }
 }

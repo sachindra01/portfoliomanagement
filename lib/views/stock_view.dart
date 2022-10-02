@@ -27,6 +27,7 @@ class _StockManageState extends State<StockManage> {
   final amountController = TextEditingController();
   final transactionTypeController = TextEditingController();
   var stocksDropDown = "Select Stock";
+    String y='';
 
   @override
   void initState() {
@@ -90,19 +91,19 @@ class _StockManageState extends State<StockManage> {
                                 );
                               }).toList(),
                             ),
-                            TextFormField(
+                             TextFormField(
                               keyboardType: TextInputType.number,
                               controller: amountController,
-                              decoration:const InputDecoration(hintText: "Enter the Amount"),
+                              decoration:const InputDecoration(hintText: "Current price of stock"),
                               autovalidateMode:AutovalidateMode.onUserInteraction,
                               validator: (contact) => contact!.isEmpty
-                                  ? "Amount cannot be empty."
+                                  ? "Current price of stock"
                                   : null,
                             ),
                             TextFormField(
                               keyboardType: TextInputType.number,
                               controller: sellingPriceController,
-                              decoration:const InputDecoration(hintText: "Selling Price"),
+                              decoration:const InputDecoration(hintText: "Selling/buying Price"),
                               autovalidateMode:AutovalidateMode.onUserInteraction,
                               validator: (contact) => contact!.isEmpty
                                   ? "Selling Price cannot be empty."
@@ -177,40 +178,32 @@ class _StockManageState extends State<StockManage> {
       ),
       body: Column(
         children: [
-          //Header
-          Card(
+          Expanded(child: stockLists()),
+           Card(
             color: Colors.teal,
             child: Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Flexible(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    SizedBox(
-                      child: Text('Stock Name', style: TextStyle(color: Colors.white),)),
-                    SizedBox(
-                      width: 2,
-                    ),
-                    Text('Type', style: TextStyle(color: Colors.white),),
-                     SizedBox(
-                      width: 2,
-                    ),
-                    Text('Quantity', style: TextStyle(color: Colors.white),),
-                     SizedBox(
-                      width: 2,
-                    ),
-                    Text('Amount', style: TextStyle(color: Colors.white),),
-                     SizedBox(
-                      width: 2,
-                    ),
-                    Text('TransactionDate', style: TextStyle(color: Colors.white),),
-                  ],
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  GetBuilder(
+                    init: StockManageController(),
+                    builder: (_){
+                      return Obx(
+                        ()=> stockManageController.isLoading.value
+                        ? stockManageController.stockList.isEmpty?const SizedBox():
+                        const Center(child: Text('Loading...', style: TextStyle(color: Colors.white),))
+                        : //Totals section
+                        Text(
+                          'Total  Investment: ${stockManageController.stockPriceList.reduce((value, element) =>  value + element)}', style: const TextStyle(color: Colors.white),
+                        ),
+                      );
+                    }
+                  ),
+                ],
               ),
             ),
           ),
-          //Stock List that has been added
-          Expanded(child: stockLists()),
 
           //Totals section
           // Card(
@@ -255,154 +248,177 @@ class _StockManageState extends State<StockManage> {
             height: MediaQuery.of(context).size.height - kToolbarHeight,
             child: const Center(child: CircularProgressIndicator( color: Colors.black,),),
           )
-          : ListView.builder(
-            itemCount: stockManageController.stockList.length,
-            itemBuilder: (BuildContext context, index){
-              return SizedBox(
-                height: 100,
-                width: MediaQuery.of(context).size.width,
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(
-                          width: 25,
-                          child: Text(stockManageController.stockList[index].stockName)),
-                        
-                        SizedBox(
-                          width: 25,
-                          child: Text(stockManageController.stockList[index].transactionStatus)),
-                        SizedBox(
-                          width: 25,
-                          child: Text(stockManageController.stockList[index].transactionQuantity)),
-                        SizedBox(
-                          child: Text(stockManageController.stockList[index].amount)),
-                        Text(stockManageController.stockList[index].transactionDate),
-                      ],
-                    ),
+          :stockManageController.stockList.isEmpty?const SizedBox():
+          GridView.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 200,
+              childAspectRatio: 2/ 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10),
+              itemCount: stockManageController.stockList.length,
+              itemBuilder: (BuildContext ctx, index) {
+               
+                  var total=    stockManageController.stockPriceList.reduce((value, element) =>  value + element);
+
+                var x= (int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice))-int.parse(stockManageController.stockList[index].currentAmount);
+                if( int.parse(stockManageController.stockList[index].currentAmount)>(int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice))){
+                  y='loss';
+                }else{
+                y ='profit';
+                }
+                return Padding(
+                  padding: const EdgeInsets.all(2.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color:y=='loss'?Colors.red: Colors.green,
+                      borderRadius: BorderRadius.circular(10)
+                    ), 
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [  
+                          Row(
+                            children: [
+                                const Text('Stock Name  ::',style:TextStyle(
+                                  color: Colors.white,fontSize: 15.0
+                                  )
+                                ),
+                                const  SizedBox(
+                                      width: 10,
+                                ),
+                                Text(stockManageController.stockList[index].stockName,style: const TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                                )),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 14,
+                          ),
+                          Row(
+                            children: [
+                              const Text('Total unit ::',style:TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                              )),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Text(stockManageController.stockList[index].transactionQuantity,style: const TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                              )),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 14,
+                          ),
+                          Row(
+                            children: [
+                                const Text('Sold Amount ::',style:TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                                )
+                              ),
+                              const  SizedBox(
+                                    width: 10,
+                              ),
+                              Text((int.parse(stockManageController.stockList[index].transactionQuantity)*int.parse(stockManageController.stockList[index].sellingPrice)).toString(),style: const TextStyle(
+                              color: Colors.white,fontSize: 15.0
+                              )),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 14,
+                          ),
+                          Row(
+                            children: [
+                              const Text('Current Amount ::',style:TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                                )
+                              ),
+                              const  SizedBox(
+                                    width: 10,
+                              ),
+                              Text(stockManageController.stockList[index].currentAmount,style: const TextStyle(
+                              color: Colors.white,fontSize: 15.0
+                              )),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 14,
+                          ),
+                          Row(
+                            children: [
+                                  const  Text('Total Investment  ::',style:TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                                )),
+                                const  SizedBox(
+                                      width: 10,
+                                ),
+                                Text(total.toString(),style: const TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                               )),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          ),
+                            Row(
+                              children: [
+                                Text('Overall $y ::',style:const TextStyle(
+                                  color: Colors.white,fontSize: 15.0
+                                  )
+                                ),
+                                const  SizedBox(
+                                width: 10,
+                                ),
+                                Text(x.toString(),style: const TextStyle(
+                                color: Colors.white,fontSize: 15.0
+                                )),
+                              ],
+                          ),
+                      ]),
+                    ),    
                   ),
-                ),
-              );
-            }
-          )
+                );
+              }
+            ),
+          //  ListView.builder(
+          //   itemCount: stockManageController.stockList.length,
+          //   itemBuilder: (BuildContext context, index){
+          //     return SizedBox(
+          //       height: 100,
+          //       width: MediaQuery.of(context).size.width,
+          //       child: Card(
+          //         child: Padding(
+          //           padding: const EdgeInsets.all(8.0),
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //             children: [
+          //               SizedBox(
+          //                 width: 25,
+          //                 child: Text(stockManageController.stockList[index].stockName)),
+                        
+          //               SizedBox(
+          //                 width: 25,
+          //                 child: Text(stockManageController.stockList[index].transactionStatus)),
+          //               SizedBox(
+          //                 width: 25,
+          //                 child: Text(stockManageController.stockList[index].transactionQuantity)),
+          //               SizedBox(
+          //                 child: Text(stockManageController.stockList[index].sellingPrice)),
+          //               Text(stockManageController.stockList[index].transactionDate),
+          //             ],
+          //           ),
+          //         ),
+          //       ),
+          //     );
+          //   }
+          // )
         );
       }
     );
   }
 
-  //Add New Stocks to firebase
-  // uploadStock() async{
-  //   final isValid = formKey.currentState!.validate();
-  //   if (!isValid) return;
-  //   if (stocksDropDown == "Select Stock") {
-  //     return ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text("Select a Stock"),
-  //         backgroundColor: Colors.redAccent,
-  //       )
-  //     );
-  //   }
-  //   showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (context) => const Center(
-  //         child: CircularProgressIndicator(),
-  //       ),
-  //     );
-
-  //   DocumentReference documentReferencer = FirebaseFirestore.instance.collection("stocks").doc(stocksDropDown.trim());
-  //   Map<String, dynamic> data = {
-  //     'stock_name':stocksDropDown.trim(),
-  //     'selling_price':buyingPriceController.text.trim().toString(),
-  //     'transaction_date':transactionDateController.text.trim().toString(),
-  //     'quantity':quantityController.text.trim().toString(),
-  //     'transaction_type':transactionTypeController.text.trim().toString(),
-
-  //   };
-  //   await documentReferencer.set(data).then((value) => Navigator.pop(context)).then((value) => Navigator.pop(context));
-  //   stockManageController.getData();
-  // }
-  // upload() async{
-  //   final isValid = formKey.currentState!.validate();
-  //   if (!isValid) return;
-  //   if (stocksDropDown == "Select Stock") {
-  //     return ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text("Select a Stock"),
-  //         backgroundColor: Colors.redAccent,
-  //       )
-  //     );
-  //   }
-  //   showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (context) => const Center(
-  //         child: CircularProgressIndicator(),
-  //       ),
-  //     );
-  //     DocumentReference documentReferencer = FirebaseFirestore.instance.collection("stocks").doc(stocksDropDown.trim());
-  //     Map<String, dynamic> data = {
-  //       'stock_name':stocksDropDown.trim(),
-  //       'amount':amountController.text.trim().toString(),
-  //       'transaction_date':transactionDateController.text.trim().toString(),
-  //       'transaction_quantity':quantityController.text.trim().toString(),
-  //       'transaction_status':transactionTypeController.text.trim().toString(),
-  //       'selling_Price':sellingPriceController.text.trim().toString(),
-  //     };
-  //     await documentReferencer.set(data).then((value) => Navigator.pop(context))
-  //     .then((value) => Navigator.pop(context))
-  //     .then((value) => 
-  //       MotionToast(
-  //         icon: Icons.check_circle_outline,
-  //         iconSize: 0.0,
-  //         primaryColor: Colors.transparent,
-  //         secondaryColor: Colors.transparent,
-  //         animationCurve: Curves.bounceOut,
-  //         backgroundType: BackgroundType.transparent,
-  //         layoutOrientation: ToastOrientation.rtl,
-  //         animationType: AnimationType.fromTop,
-  //         position: MotionToastPosition.top,
-  //         animationDuration: const Duration(milliseconds: 1000),
-  //         borderRadius: 4.0,
-  //         padding: const EdgeInsets.only(top : 12.0, left: 8.0, right: 8.0),
-  //         height: MediaQuery.of(context).size.height * 0.095,
-  //         width: MediaQuery.of(context).size.width - 40,
-  //         title: Row(
-  //           children: [
-  //             const SizedBox(width: 20.0,),
-  //             Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: const [
-  //                 Text(
-  //                   'Success!',
-  //                   style:
-  //                       TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-  //                 ),
-  //                 SizedBox(
-  //                   height: 10,
-  //                 ),
-  //                 Text(
-  //                   'Data uploaded successfully',
-  //                   style: TextStyle(
-  //                     fontWeight: FontWeight.bold,
-  //                     color: Colors.white,
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //             const Spacer(),
-  //             const Icon(
-  //               Icons.check_circle,
-  //               color: Colors.green,
-  //             ),
-  //           ],
-  //         ),
-  //         description: const SizedBox(),
-  //       ).show(context),
-  //     );
-  // }
   uploadStock() async{
     final isValid = formKey.currentState!.validate();
     if (!isValid) return;
@@ -424,8 +440,8 @@ class _StockManageState extends State<StockManage> {
 
     DocumentReference documentReferencer = FirebaseFirestore.instance.collection("stocks").doc(stocksDropDown.trim());
     Map<String, dynamic> data = {
+    'current_amount':amountController.text.trim(),
     'stock_name':stocksDropDown.trim(),
-    'amount':amountController.text.trim().toString(),
     'transaction_date':transactionDateController.text.trim().toString(),
     'transaction_quantity':quantityController.text.trim().toString(),
     'transaction_status':transactionTypeController.text.trim().toString(),
@@ -436,22 +452,6 @@ class _StockManageState extends State<StockManage> {
     stockManageController.getData();
   }
 
-  //Date And Time Picker
-  //  void dateTimePicker() {
-  //   DatePicker.showDatePicker(
-  //     context,
-  //     showTitleActions: true,
-  //     onChanged: (date) {
-  //     }, 
-  //     onConfirm: (date) {
-  //       //Set the picked value to the Text controller
-  //       setState(() {
-  //         transactionDateController.text=date.toString();
-  //       });
-  //     }, 
-  //     currentTime: DateTime.now(), locale: LocaleType.en
-  //   );
-  // }
    void dateTimePicker() {
     DatePicker.showDatePicker(
       context,

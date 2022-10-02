@@ -1,6 +1,6 @@
 class StockManageModel{
   String? stockName;
-  String? amount;
+  String ?currentAmount;
   String? transactionStatus;
   String? transactionQuantity;
   String? sellingPrice;
@@ -8,7 +8,7 @@ class StockManageModel{
 
   StockManageModel(
     this.stockName, 
-    this.amount,
+    this.currentAmount,
     this.transactionStatus, 
     this.transactionQuantity, 
     this.sellingPrice,
